@@ -1,0 +1,101 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="1561.61">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+    span.s1 {font: 12.0px 'Apple SD Gothic Neo'}
+  </style>
+</head>
+<body>
+<p class="p1">const KEY = "cafe-stock-v1";</p>
+<p class="p1">let items = JSON.parse(localStorage.getItem(KEY)) || [];</p>
+<p class="p2"><br></p>
+<p class="p1">function save() {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>localStorage.setItem(KEY, JSON.stringify(items));</p>
+<p class="p1"><span class="Apple-converted-space">  </span>render();</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function addItem() {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const name = nameInput.value;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const par = Number(parInput.value);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const location = locationInput.value;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if (!name) return;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>items.push({</p>
+<p class="p1"><span class="Apple-converted-space">    </span>id: Date.now(),</p>
+<p class="p1"><span class="Apple-converted-space">    </span>name,</p>
+<p class="p1"><span class="Apple-converted-space">    </span>par,</p>
+<p class="p1"><span class="Apple-converted-space">    </span>batches: [],</p>
+<p class="p1"><span class="Apple-converted-space">    </span>location</p>
+<p class="p1"><span class="Apple-converted-space">  </span>});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>nameInput.value = "";</p>
+<p class="p1"><span class="Apple-converted-space">  </span>parInput.value = "";</p>
+<p class="p1"><span class="Apple-converted-space">  </span>save();</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function addBatch(id) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const qty = Number(prompt("<span class="s1">수량</span>(<span class="s1">병</span>)"));</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const expiry = prompt("<span class="s1">만료일</span> (YYYY-MM-DD)");</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const location = prompt("<span class="s1">위치</span> (<span class="s1">창고</span>/<span class="s1">콜드룸</span>/<span class="s1">가게</span>)");</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if (!qty || !expiry) return;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>const item = items.find(i =&gt; i.id === id);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>item.batches.push({ qty, expiry, location });</p>
+<p class="p1"><span class="Apple-converted-space">  </span>save();</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function useOne(id) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const item = items.find(i =&gt; i.id === id);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>item.batches.sort((a,b)=&gt;a.expiry.localeCompare(b.expiry));</p>
+<p class="p1"><span class="Apple-converted-space">  </span>for (let b of item.batches) {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if (b.qty &gt; 0) { b.qty--; break; }</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>save();</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function totalQty(item) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return item.batches.reduce((s,b)=&gt;s+b.qty,0);</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function render() {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>list.innerHTML = "";</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const today = new Date();</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>items.forEach(item =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const total = totalQty(item);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const reorder = total &lt; item.par;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>const div = document.createElement("div");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>div.className = "card";</p>
+<p class="p1"><span class="Apple-converted-space">    </span>div.innerHTML = `</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;strong&gt;${item.name}&lt;/strong&gt; (${total}<span class="s1">병</span>)</p>
+<p class="p1"><span class="Apple-converted-space">      </span>${reorder ? `&lt;span class="danger"&gt; <span class="s1">주문</span> <span class="s1">필요</span>&lt;/span&gt;` : ""}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;br&gt;<span class="s1">위치</span>: ${item.location}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;br&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;button onclick="addBatch(${item.id})"&gt;<span class="s1">입고</span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;button onclick="useOne(${item.id})"&gt;-1 <span class="s1">사용</span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>${item.batches.map(b=&gt;{</p>
+<p class="p1"><span class="Apple-converted-space">          </span>const d = Math.ceil((new Date(b.expiry)-today)/86400000);</p>
+<p class="p1"><span class="Apple-converted-space">          </span>return `• ${b.qty}<span class="s1">병</span> / ${b.expiry} (${b.location}) ${d&lt;=3?'&lt;span class="danger"&gt;<span class="s1">임박</span>&lt;/span&gt;':''}`;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}).join("&lt;br&gt;")}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>`;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>list.appendChild(div);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>});</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">const nameInput = document.getElementById("name");</p>
+<p class="p1">const parInput = document.getElementById("par");</p>
+<p class="p1">const locationInput = document.getElementById("location");</p>
+<p class="p1">const list = document.getElementById("list");</p>
+<p class="p2"><br></p>
+<p class="p1">render();</p>
+</body>
+</html>
